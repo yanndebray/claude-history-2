@@ -229,6 +229,155 @@
   details.thinking { background: #f4f0fa; }
   details.tool-result.error { background: #fdecea; }
 
+  /* Artifacts */
+  .artifacts-panel {
+    margin: 14px auto 0;
+    max-width: 820px;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  .artifacts-panel > summary {
+    padding: 10px 14px;
+    cursor: pointer;
+    font-weight: 500;
+    background: linear-gradient(180deg, #fff, #fbf9f4);
+    user-select: none;
+    font-size: 13px;
+  }
+  .artifacts-panel[open] > summary { border-bottom: 1px solid var(--border); }
+  .artifacts-list { padding: 4px 0; }
+  .artifacts-list-item { padding: 0 14px; }
+  .artifacts-list-item + .artifacts-list-item { border-top: 1px solid var(--border); }
+  .art-row {
+    display: flex; align-items: center; gap: 10px;
+    padding: 8px 0;
+    font-size: 13px;
+  }
+  .art-row .art-title {
+    flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    font-weight: 500; min-width: 0;
+  }
+  .art-row .art-versions-count { color: var(--muted); font-size: 11px; }
+  .art-row select, .art-row .art-toggle {
+    padding: 3px 8px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    background: var(--panel);
+    font-size: 11px;
+    cursor: pointer;
+    color: var(--muted);
+  }
+  .art-row .art-toggle:hover { background: var(--accent-soft); color: var(--accent); border-color: var(--accent); }
+  .art-body { padding: 4px 0 12px; }
+
+  .artifact-card {
+    margin: 10px 0;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: #fdfcf8;
+    overflow: hidden;
+  }
+  .artifact-card.artifact-update { background: #f9f6ef; }
+  .artifact-card-header {
+    display: flex; align-items: center; gap: 8px;
+    padding: 8px 12px;
+    background: rgba(0,0,0,0.02);
+    border-bottom: 1px solid var(--border);
+    font-size: 12px;
+  }
+  .artifact-icon { font-size: 14px; }
+  .artifact-title {
+    font-weight: 600;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0;
+  }
+  .artifact-type-badge {
+    padding: 2px 7px;
+    background: var(--accent-soft);
+    color: var(--accent);
+    border-radius: 3px;
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    flex-shrink: 0;
+  }
+  .artifact-cmd {
+    color: var(--muted);
+    font-size: 11px;
+    text-transform: capitalize;
+    flex-shrink: 0;
+  }
+  .artifact-card-header .copy-btn { margin-left: auto; flex-shrink: 0; }
+  .artifact-tabs {
+    display: flex; gap: 4px;
+    padding: 6px 12px 0;
+    background: rgba(0,0,0,0.02);
+  }
+  .art-tab {
+    padding: 4px 12px;
+    border: 1px solid var(--border);
+    border-bottom: none;
+    border-radius: 4px 4px 0 0;
+    background: var(--panel);
+    color: var(--muted);
+    font-size: 11px;
+    cursor: pointer;
+  }
+  .art-tab.active { background: #fdfcf8; color: var(--text); }
+  .artifact-html-frame {
+    width: 100%; height: 480px;
+    border: none;
+    background: white;
+    display: block;
+    resize: vertical;
+    overflow: auto;
+  }
+  .artifact-source {
+    margin: 0;
+    padding: 12px 14px;
+    background: var(--code-bg);
+    overflow: auto;
+    max-height: 480px;
+    font-size: 12px;
+  }
+  .artifact-source code { background: transparent; padding: 0; }
+  .artifact-rendered-md { padding: 14px 16px; max-height: 480px; overflow-y: auto; }
+  .artifact-svg-frame { padding: 16px; background: white; text-align: center; }
+  .artifact-svg-frame img { max-width: 100%; max-height: 460px; }
+  .artifact-diff {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1px;
+    background: var(--border);
+  }
+  .diff-side { padding: 8px 12px; background: var(--panel); }
+  .diff-old { background: #fdecea; }
+  .diff-new { background: #ecf7ed; }
+  .diff-label {
+    font-size: 10px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 4px;
+    font-weight: 600;
+  }
+  .diff-side pre {
+    margin: 0;
+    background: transparent;
+    padding: 0;
+    font-size: 11px;
+    white-space: pre-wrap;
+    word-break: break-word;
+    max-height: 280px;
+    overflow-y: auto;
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  }
+  @media (max-width: 700px) {
+    .artifact-diff { grid-template-columns: 1fr; }
+  }
+
   .empty {
     display: flex;
     flex-direction: column;
@@ -424,11 +573,16 @@ function renderMessages() {
   header.querySelector('.conv-info').textContent =
     `${(c.chat_messages || []).length} messages · ${formatDate(c.created_at)}`;
 
+  const registry = buildArtifactRegistry(c);
+
   const list = document.createElement('div');
   list.className = 'msg-list';
 
+  const panel = renderArtifactPanel(registry);
+  if (panel) list.appendChild(panel);
+
   (c.chat_messages || []).forEach((msg, mi) => {
-    list.appendChild(renderMessage(msg, mi));
+    list.appendChild(renderMessage(msg, mi, { conv: c, registry }));
   });
 
   messagesEl.innerHTML = '';
@@ -441,7 +595,7 @@ function renderMessages() {
   });
 }
 
-function renderMessage(msg, mi) {
+function renderMessage(msg, mi, ctx) {
   const article = document.createElement('article');
   article.className = 'msg msg-' + (msg.sender || 'unknown');
 
@@ -463,10 +617,10 @@ function renderMessage(msg, mi) {
 
   const content = msg.content && msg.content.length ? msg.content : null;
   if (content) {
-    for (const c of content) {
-      const el = renderContent(c);
+    content.forEach((c, ci) => {
+      const el = renderContent(c, Object.assign({}, ctx, { msgIdx: mi, contentIdx: ci }));
       if (el) body.appendChild(el);
-    }
+    });
   } else if (msg.text) {
     body.innerHTML = renderMarkdown(msg.text);
   }
@@ -487,8 +641,11 @@ function renderMessage(msg, mi) {
   return article;
 }
 
-function renderContent(c) {
+function renderContent(c, ctx) {
   if (!c || !c.type) return null;
+  if (c.type === 'tool_use' && c.name === 'artifacts' && c.input && c.input.id) {
+    return renderArtifactCard(c, ctx || {});
+  }
   if (c.type === 'text') {
     const div = document.createElement('div');
     div.innerHTML = renderMarkdown(c.text || '');
@@ -542,6 +699,302 @@ function makeDetails(cls, summaryHtml, bodyHtml, isHtml) {
   return d;
 }
 
+// ---------- Artifacts ----------
+
+function typeLabel(t) {
+  if (!t) return '?';
+  const m = {
+    'text/markdown': 'md',
+    'text/html': 'html',
+    'application/vnd.ant.react': 'react',
+    'application/vnd.ant.code': 'code',
+    'image/svg+xml': 'svg',
+    'application/vnd.ant.mermaid': 'mermaid',
+  };
+  return m[t] || t.split('/').pop();
+}
+
+function artifactLang(t) {
+  if (t === 'text/markdown') return 'markdown';
+  if (t === 'text/html') return 'html';
+  if (t === 'application/vnd.ant.react') return 'jsx';
+  if (t === 'application/vnd.ant.mermaid') return 'mermaid';
+  if (t === 'image/svg+xml') return 'xml';
+  return '';
+}
+
+function buildArtifactRegistry(conv) {
+  const map = new Map();
+  (conv.chat_messages || []).forEach((msg, mi) => {
+    (msg.content || []).forEach((c, ci) => {
+      if (c && c.type === 'tool_use' && c.name === 'artifacts' && c.input && c.input.id) {
+        const inp = c.input;
+        const id = inp.id;
+        let rec = map.get(id);
+        if (!rec) {
+          rec = { id, title: id, type: '', versions: [] };
+          map.set(id, rec);
+        }
+        if (inp.title) rec.title = inp.title;
+        if (inp.type) rec.type = inp.type;
+        rec.versions.push({ msgIdx: mi, contentIdx: ci, input: inp });
+      }
+    });
+  });
+  for (const rec of map.values()) {
+    let cur = null;
+    for (const v of rec.versions) {
+      const inp = v.input;
+      if (inp.command === 'create' || inp.command === 'rewrite') {
+        cur = inp.content == null ? '' : String(inp.content);
+      } else if (inp.command === 'update' && cur != null && typeof inp.old_str === 'string') {
+        cur = cur.split(inp.old_str).join(inp.new_str == null ? '' : String(inp.new_str));
+      }
+      v.resolvedContent = cur;
+    }
+    rec.latestContent = rec.versions.length ? rec.versions[rec.versions.length - 1].resolvedContent : null;
+  }
+  return map;
+}
+
+function renderArtifactPanel(registry) {
+  if (!registry || registry.size === 0) return null;
+  const panel = document.createElement('details');
+  panel.className = 'artifacts-panel';
+  panel.open = registry.size <= 3;
+
+  const summary = document.createElement('summary');
+  summary.textContent = `📦 ${registry.size} artifact${registry.size > 1 ? 's' : ''} in this conversation`;
+  panel.appendChild(summary);
+
+  const list = document.createElement('div');
+  list.className = 'artifacts-list';
+
+  for (const rec of registry.values()) {
+    const item = document.createElement('div');
+    item.className = 'artifacts-list-item';
+
+    const row = document.createElement('div');
+    row.className = 'art-row';
+    row.innerHTML = `
+      <span class="artifact-type-badge"></span>
+      <span class="art-title"></span>
+      <span class="art-versions-count"></span>
+      <select class="art-version-select"></select>
+      <button type="button" class="copy-btn art-copy">Copy</button>
+      <button type="button" class="art-toggle">View</button>`;
+    row.querySelector('.artifact-type-badge').textContent = typeLabel(rec.type);
+    row.querySelector('.art-title').textContent = rec.title;
+    row.querySelector('.art-versions-count').textContent =
+      `${rec.versions.length} version${rec.versions.length > 1 ? 's' : ''}`;
+
+    const sel = row.querySelector('.art-version-select');
+    rec.versions.forEach((v, i) => {
+      const opt = document.createElement('option');
+      opt.value = String(i);
+      opt.textContent = `v${i + 1} (${v.input.command || '?'})`;
+      sel.appendChild(opt);
+    });
+    sel.value = String(rec.versions.length - 1);
+
+    const artBody = document.createElement('div');
+    artBody.className = 'art-body';
+    artBody.style.display = 'none';
+
+    const renderAt = (i) => {
+      artBody.innerHTML = '';
+      const v = rec.versions[i];
+      const content = v && v.resolvedContent != null ? v.resolvedContent : '';
+      artBody.appendChild(renderArtifactBody(rec.type, content));
+    };
+
+    sel.addEventListener('change', () => renderAt(parseInt(sel.value, 10)));
+
+    const toggle = row.querySelector('.art-toggle');
+    toggle.addEventListener('click', () => {
+      const shown = artBody.style.display !== 'none';
+      if (shown) {
+        artBody.style.display = 'none';
+        toggle.textContent = 'View';
+      } else {
+        renderAt(parseInt(sel.value, 10));
+        artBody.style.display = '';
+        toggle.textContent = 'Hide';
+      }
+    });
+
+    row.querySelector('.art-copy').addEventListener('click', (e) => {
+      const i = parseInt(sel.value, 10);
+      const txt = (rec.versions[i] && rec.versions[i].resolvedContent) || '';
+      copyToClipboard(txt, e.currentTarget);
+    });
+
+    item.appendChild(row);
+    item.appendChild(artBody);
+    list.appendChild(item);
+  }
+
+  panel.appendChild(list);
+  return panel;
+}
+
+function renderArtifactCard(c, ctx) {
+  const inp = c.input || {};
+  const cmd = inp.command || '';
+  const isUpdate = cmd === 'update';
+
+  const registry = ctx && ctx.registry;
+  const rec = registry ? registry.get(inp.id) : null;
+  const v = rec ? rec.versions.find(x =>
+    x.msgIdx === ctx.msgIdx && x.contentIdx === ctx.contentIdx
+  ) : null;
+
+  const title = inp.title || (rec && rec.title) || inp.id || 'Artifact';
+  const type = inp.type || (rec && rec.type) || '';
+
+  const card = document.createElement('div');
+  card.className = 'artifact-card' + (isUpdate ? ' artifact-update' : '');
+
+  const head = document.createElement('div');
+  head.className = 'artifact-card-header';
+  head.innerHTML = `
+    <span class="artifact-icon"></span>
+    <span class="artifact-title"></span>
+    <span class="artifact-type-badge"></span>
+    <span class="artifact-cmd"></span>
+    <button type="button" class="copy-btn">Copy artifact</button>`;
+  head.querySelector('.artifact-icon').textContent = isUpdate ? '✏️' : '📄';
+  head.querySelector('.artifact-title').textContent = isUpdate ? `Updated: ${title}` : title;
+  const badge = head.querySelector('.artifact-type-badge');
+  badge.textContent = typeLabel(type);
+  if (!type) badge.style.display = 'none';
+  head.querySelector('.artifact-cmd').textContent = cmd;
+  const copyBtn = head.querySelector('.copy-btn');
+  copyBtn.textContent = isUpdate ? 'Copy new version' : 'Copy artifact';
+  copyBtn.addEventListener('click', (e) => {
+    let txt;
+    if (isUpdate) {
+      txt = (v && v.resolvedContent) || inp.new_str || '';
+    } else {
+      txt = inp.content == null ? '' : String(inp.content);
+    }
+    copyToClipboard(txt, e.currentTarget);
+  });
+  card.appendChild(head);
+
+  const body = document.createElement('div');
+  body.className = 'artifact-content';
+  if (isUpdate) {
+    body.appendChild(renderArtifactDiff(inp));
+  } else {
+    body.appendChild(renderArtifactBody(type, inp.content == null ? '' : String(inp.content)));
+  }
+  card.appendChild(body);
+
+  return card;
+}
+
+function renderArtifactBody(type, content) {
+  const div = document.createElement('div');
+
+  if (type === 'text/markdown') {
+    div.className = 'artifact-rendered-md msg-body';
+    div.innerHTML = renderMarkdown(content);
+    return div;
+  }
+
+  if (type === 'text/html') {
+    return makeArtifactPreviewSource(content, (host) => {
+      const iframe = document.createElement('iframe');
+      iframe.className = 'artifact-html-frame';
+      iframe.setAttribute('sandbox', 'allow-scripts');
+      iframe.srcdoc = content;
+      host.appendChild(iframe);
+    });
+  }
+
+  if (type === 'image/svg+xml') {
+    return makeArtifactPreviewSource(content, (host) => {
+      const wrap = document.createElement('div');
+      wrap.className = 'artifact-svg-frame';
+      const img = document.createElement('img');
+      img.src = 'data:image/svg+xml;utf8,' + encodeURIComponent(content);
+      img.alt = 'SVG artifact';
+      wrap.appendChild(img);
+      host.appendChild(wrap);
+    });
+  }
+
+  const pre = document.createElement('pre');
+  pre.className = 'artifact-source';
+  const code = document.createElement('code');
+  code.textContent = content;
+  pre.appendChild(code);
+  div.appendChild(pre);
+  return div;
+}
+
+function makeArtifactPreviewSource(content, mountPreview) {
+  const wrap = document.createElement('div');
+  const tabs = document.createElement('div');
+  tabs.className = 'artifact-tabs';
+  tabs.innerHTML = `
+    <button type="button" class="art-tab active" data-mode="preview">Preview</button>
+    <button type="button" class="art-tab" data-mode="source">Source</button>`;
+  const previewHost = document.createElement('div');
+  mountPreview(previewHost);
+  const pre = document.createElement('pre');
+  pre.className = 'artifact-source';
+  pre.style.display = 'none';
+  const code = document.createElement('code');
+  code.textContent = content;
+  pre.appendChild(code);
+  tabs.querySelectorAll('.art-tab').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const mode = btn.dataset.mode;
+      tabs.querySelectorAll('.art-tab').forEach(b => b.classList.toggle('active', b === btn));
+      previewHost.style.display = mode === 'preview' ? '' : 'none';
+      pre.style.display = mode === 'source' ? '' : 'none';
+    });
+  });
+  wrap.appendChild(tabs);
+  wrap.appendChild(previewHost);
+  wrap.appendChild(pre);
+  return wrap;
+}
+
+function renderArtifactDiff(inp) {
+  const wrap = document.createElement('div');
+  wrap.className = 'artifact-diff';
+  wrap.innerHTML = `
+    <div class="diff-side diff-old">
+      <div class="diff-label">− Replaced</div>
+      <pre></pre>
+    </div>
+    <div class="diff-side diff-new">
+      <div class="diff-label">+ With</div>
+      <pre></pre>
+    </div>`;
+  wrap.querySelector('.diff-old pre').textContent = inp.old_str == null ? '' : String(inp.old_str);
+  wrap.querySelector('.diff-new pre').textContent = inp.new_str == null ? '' : String(inp.new_str);
+  return wrap;
+}
+
+function artifactToMarkdown(inp) {
+  const title = inp.title || inp.id || 'artifact';
+  if (inp.command === 'update') {
+    const oldS = inp.old_str == null ? '' : String(inp.old_str);
+    const newS = inp.new_str == null ? '' : String(inp.new_str);
+    return `**✏️ Updated artifact: ${title}**\n\nReplaced:\n\n\`\`\`\n${oldS}\n\`\`\`\n\nWith:\n\n\`\`\`\n${newS}\n\`\`\``;
+  }
+  const lang = artifactLang(inp.type);
+  const content = inp.content == null ? '' : String(inp.content);
+  const meta = `${inp.type || 'unknown'} · ${inp.command || 'create'}`;
+  return `**📄 Artifact: ${title}** _(${meta})_\n\n\`\`\`${lang}\n${content}\n\`\`\``;
+}
+
+// ---------- /Artifacts ----------
+
 function renderMarkdown(text) {
   if (!text) return '';
   try {
@@ -561,6 +1014,8 @@ function messageToMarkdown(msg) {
         parts.push(c.text || '');
       } else if (c.type === 'thinking') {
         parts.push(`> **Thinking**\n>\n> ${(c.thinking || '').replace(/\n/g, '\n> ')}`);
+      } else if (c.type === 'tool_use' && c.name === 'artifacts' && c.input && c.input.id) {
+        parts.push(artifactToMarkdown(c.input));
       } else if (c.type === 'tool_use') {
         const input = c.input == null ? '' :
           (typeof c.input === 'object' ? JSON.stringify(c.input, null, 2) : String(c.input));
