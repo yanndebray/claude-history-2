@@ -57,6 +57,22 @@ python3 -m http.server 8000
 # then visit http://localhost:8000
 ```
 
+## Try it with sample data
+
+Don't want to export your own data first? The repo ships a small synthetic export at [`sample/conversations.json`](sample/conversations.json) — open that file in the viewer to see how everything looks. It contains no real conversations.
+
+## Regenerating the screenshot
+
+The screenshot in this README is generated automatically from the sample data, so it stays in sync with the UI. It uses [Playwright](https://playwright.dev/) to load `index.html` in a headless browser, feed in `sample/conversations.json`, and capture the result.
+
+```bash
+npm install          # installs Playwright (once)
+npm run screenshot   # writes screenshot.png from sample/conversations.json
+```
+
+- Recipe: [`scripts/screenshot.mjs`](scripts/screenshot.mjs)
+- Sample data: [`sample/conversations.json`](sample/conversations.json) — edit it to change what the screenshot shows
+
 ## Privacy
 
 This is a static page. There is no backend and no analytics. The `conversations.json` you open is parsed entirely in your browser and nothing leaves your device. The repository itself contains **no conversation data** — exports are gitignored.

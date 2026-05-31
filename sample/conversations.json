@@ -1,0 +1,115 @@
+[
+  {
+    "uuid": "11111111-1111-1111-1111-111111111111",
+    "name": "Build a sortable data table in React",
+    "created_at": "2026-05-28T09:12:00.000000Z",
+    "updated_at": "2026-05-28T09:41:00.000000Z",
+    "chat_messages": [
+      {
+        "uuid": "m1",
+        "sender": "human",
+        "created_at": "2026-05-28T09:12:00.000000Z",
+        "text": "Can you build me a small React component that renders a sortable table of products? Columns: name, price, stock. Clicking a header should sort by that column.",
+        "content": [
+          { "type": "text", "text": "Can you build me a small React component that renders a sortable table of products? Columns: name, price, stock. Clicking a header should sort by that column." }
+        ]
+      },
+      {
+        "uuid": "m2",
+        "sender": "assistant",
+        "created_at": "2026-05-28T09:12:30.000000Z",
+        "content": [
+          { "type": "thinking", "thinking": "The user wants a sortable table. I'll keep sort state in `useState`, derive a sorted copy with `useMemo`, and toggle the direction when the active column header is clicked again. A small, dependency-free component is the cleanest answer here." },
+          { "type": "text", "text": "Here's a self-contained `ProductTable` component. Click any header to sort; click the same header again to flip the direction.\n\n- Sort state lives in a single `useState`\n- The sorted rows are memoized so we don't re-sort on every render\n- Numeric columns compare as numbers, text columns compare with `localeCompare`" },
+          {
+            "type": "tool_use",
+            "name": "artifacts",
+            "input": {
+              "id": "product-table",
+              "type": "application/vnd.ant.react",
+              "title": "ProductTable.jsx",
+              "command": "create",
+              "content": "import { useState, useMemo } from 'react';\n\nconst PRODUCTS = [\n  { name: 'Keyboard', price: 79, stock: 12 },\n  { name: 'Monitor', price: 329, stock: 4 },\n  { name: 'Mouse', price: 29, stock: 40 },\n  { name: 'Webcam', price: 99, stock: 0 },\n];\n\nexport default function ProductTable() {\n  const [sort, setSort] = useState({ key: 'name', dir: 1 });\n  const rows = useMemo(() => {\n    return [...PRODUCTS].sort((a, b) => {\n      const x = a[sort.key], y = b[sort.key];\n      const cmp = typeof x === 'number' ? x - y : String(x).localeCompare(String(y));\n      return cmp * sort.dir;\n    });\n  }, [sort]);\n\n  const toggle = (key) =>\n    setSort((s) => (s.key === key ? { key, dir: -s.dir } : { key, dir: 1 }));\n\n  return (\n    <table style={{ borderCollapse: 'collapse', width: '100%' }}>\n      <thead>\n        <tr>\n          {['name', 'price', 'stock'].map((k) => (\n            <th key={k} onClick={() => toggle(k)} style={{ cursor: 'pointer', textAlign: 'left', padding: 8, borderBottom: '2px solid #ddd' }}>\n              {k} {sort.key === k ? (sort.dir > 0 ? '↑' : '↓') : ''}\n            </th>\n          ))}\n        </tr>\n      </thead>\n      <tbody>\n        {rows.map((r) => (\n          <tr key={r.name}>\n            <td style={{ padding: 8 }}>{r.name}</td>\n            <td style={{ padding: 8 }}>${r.price}</td>\n            <td style={{ padding: 8 }}>{r.stock}</td>\n          </tr>\n        ))}\n      </tbody>\n    </table>\n  );\n}\n"
+            }
+          }
+        ]
+      },
+      {
+        "uuid": "m3",
+        "sender": "human",
+        "created_at": "2026-05-28T09:30:00.000000Z",
+        "content": [
+          { "type": "text", "text": "Nice. Can you grey out rows that are out of stock?" }
+        ]
+      },
+      {
+        "uuid": "m4",
+        "sender": "assistant",
+        "created_at": "2026-05-28T09:30:40.000000Z",
+        "content": [
+          { "type": "text", "text": "Done — rows with `stock === 0` now render at reduced opacity with a muted colour." },
+          {
+            "type": "tool_use",
+            "name": "artifacts",
+            "input": {
+              "id": "product-table",
+              "type": "application/vnd.ant.react",
+              "title": "ProductTable.jsx",
+              "command": "update",
+              "old_str": "          <tr key={r.name}>",
+              "new_str": "          <tr key={r.name} style={{ opacity: r.stock === 0 ? 0.45 : 1, color: r.stock === 0 ? '#999' : 'inherit' }}>"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "uuid": "22222222-2222-2222-2222-222222222222",
+    "name": "Explain async/await vs Promises",
+    "created_at": "2026-05-27T14:02:00.000000Z",
+    "updated_at": "2026-05-27T14:18:00.000000Z",
+    "chat_messages": [
+      {
+        "uuid": "n1",
+        "sender": "human",
+        "created_at": "2026-05-27T14:02:00.000000Z",
+        "content": [
+          { "type": "text", "text": "What's the practical difference between async/await and using .then() chains?" }
+        ]
+      },
+      {
+        "uuid": "n2",
+        "sender": "assistant",
+        "created_at": "2026-05-27T14:02:25.000000Z",
+        "content": [
+          { "type": "text", "text": "They're the same machinery underneath — `async/await` is syntax sugar over Promises. The practical differences:\n\n1. **Readability** — `await` lets you write asynchronous code that reads top-to-bottom, like synchronous code.\n2. **Error handling** — `try/catch` works naturally with `await`, whereas `.then()` chains need a trailing `.catch()`.\n3. **Intermediate values** — with `await` you keep results in normal local variables; with `.then()` you have to thread them through the chain or nest callbacks.\n\nUse `.then()` when you want fire-and-forget or a quick one-liner; reach for `async/await` for anything with branching or multiple dependent steps." }
+        ]
+      }
+    ]
+  },
+  {
+    "uuid": "33333333-3333-3333-3333-333333333333",
+    "name": "Debug a failing pytest fixture",
+    "created_at": "2026-05-26T11:20:00.000000Z",
+    "updated_at": "2026-05-26T11:55:00.000000Z",
+    "chat_messages": [
+      {
+        "uuid": "p1",
+        "sender": "human",
+        "created_at": "2026-05-26T11:20:00.000000Z",
+        "content": [
+          { "type": "text", "text": "My fixture keeps tearing down the DB before the test reads it. Why?" }
+        ]
+      },
+      {
+        "uuid": "p2",
+        "sender": "assistant",
+        "created_at": "2026-05-26T11:20:30.000000Z",
+        "content": [
+          { "type": "text", "text": "That's almost always a fixture **scope** mismatch. A function-scoped fixture is torn down after each test; if your data is seeded in a `session`-scoped fixture but you yield from a `function`-scoped one, the teardown order can surprise you. Check the `scope=` argument and make sure the seeding fixture outlives the readers." }
+        ]
+      }
+    ]
+  }
+]
