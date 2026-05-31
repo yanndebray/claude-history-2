@@ -1,2 +1,5 @@
 data-*
 .DS_Store
+
+# local sample/screenshot tooling
+.sample/
