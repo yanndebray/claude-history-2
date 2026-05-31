@@ -7,7 +7,8 @@
   "type": "module",
   "scripts": {
     "screenshot": "playwright install chromium && node scripts/screenshot.mjs",
-    "serve": "python3 -m http.server 8000"
+    "serve": "python3 -m http.server 8000",
+    "convert-history": "python3 scripts/convert-history.py"
   },
   "devDependencies": {
     "playwright": "^1.49.0"

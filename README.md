@@ -61,6 +61,16 @@ python3 -m http.server 8000
 
 Don't want to export your own data first? The repo ships a small synthetic export at [`sample/conversations.json`](sample/conversations.json) — open that file in the viewer to see how everything looks. It contains no real conversations.
 
+## Importing from the v1 dashboard
+
+If you also use the companion [`claude-history`](https://github.com/yanndebray/claude-history) project — the Python/Streamlit dashboard that parses exports into a SQLite database — you can view that same history in this viewer:
+
+```bash
+npm run convert-history   # or: python3 scripts/convert-history.py
+```
+
+This reads `claude-history/data/conversations.db` and writes `data-claude-history/conversations.json`. Open that file with the **Open conversations.json** button. The output folder matches the `data-*` gitignore rule, so your real conversations stay local and are never committed.
+
 ## Regenerating the screenshot
 
 The screenshot in this README is generated automatically from the sample data, so it stays in sync with the UI. It uses [Playwright](https://playwright.dev/) to load `index.html` in a headless browser, feed in `sample/conversations.json`, and capture the result.
